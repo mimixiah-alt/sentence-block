@@ -1,20 +1,15 @@
 import {
   LANGUAGE_OPTIONS,
-  LESSONS,
   type LanguageCode,
 } from '../data/lessons';
 
 interface StartScreenProps {
-  selectedLessonId: number | null;
-  onSelectLesson: (lessonId: number) => void;
   language: LanguageCode;
   onLanguageChange: (language: LanguageCode) => void;
   onNext: () => void;
 }
 
 export function StartScreen({
-  selectedLessonId,
-  onSelectLesson,
   language,
   onLanguageChange,
   onNext,
@@ -38,43 +33,7 @@ export function StartScreen({
             록
           </span>
         </h1>
-        <p className="app-subtitle">
-          연습할 과를 고르고 블록을 놓아 한국어 문장을 만들어 보세요.
-        </p>
-
-        <section className="lesson-section" aria-label="과 선택">
-          <div className="lesson-grid" role="group" aria-label="과 목록">
-            {LESSONS.map((lesson) => {
-              const isSelected = selectedLessonId === lesson.id;
-              return (
-                <button
-                  key={lesson.id}
-                  type="button"
-                  className={`lesson-card ${isSelected ? 'is-selected' : ''}`}
-                  aria-pressed={isSelected}
-                  onClick={() => onSelectLesson(lesson.id)}
-                >
-                  <div className="lesson-card-top">
-                    <span className="lesson-badge">{lesson.label}</span>
-                    {isSelected && (
-                      <span className="lesson-check" aria-hidden="true">
-                        ✓
-                      </span>
-                    )}
-                  </div>
-                  <strong className="lesson-title">{lesson.title}</strong>
-                  <div className="lesson-grammar-tags">
-                    {lesson.grammarPoints.map((grammar) => (
-                      <span key={grammar.name} className="lesson-grammar-tag">
-                        {grammar.name}
-                      </span>
-                    ))}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </section>
+        <p className="app-subtitle">블록을 놓아 한국어 문장을 만들어 보세요.</p>
 
         <section className="language-picker" aria-label="뜻을 볼 언어 선택">
           <p className="language-picker-label">뜻을 볼 언어를 고르세요</p>
@@ -98,10 +57,9 @@ export function StartScreen({
         <button
           type="button"
           className="btn btn-primary btn-large start-button"
-          disabled={selectedLessonId === null}
           onClick={onNext}
         >
-          다음
+          시작하기
         </button>
       </div>
 

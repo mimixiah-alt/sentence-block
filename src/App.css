@@ -79,6 +79,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  font-family: 'Jua', sans-serif;
   font-size: 1.9rem;
   font-weight: 400;
   line-height: 1;
@@ -259,6 +260,14 @@
 }
 
 /* Lesson Selection (Page 1) */
+.lesson-select-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 4px;
+  text-align: center;
+}
+
 .lesson-section {
   width: 100%;
 }
@@ -375,7 +384,7 @@
 }
 
 .grammar-screen-title {
-  font-size: 1.7rem;
+  font-size: 2rem;
   font-weight: 800;
   color: var(--text-main);
 }
@@ -397,7 +406,7 @@
 }
 
 .grammar-point-name {
-  font-size: 1.3rem;
+  font-size: 1.65rem;
   font-weight: 800;
   color: var(--primary-shadow);
   padding-bottom: 8px;
@@ -907,8 +916,9 @@
   min-height: 52px;
   padding: 11px 18px;
   border-radius: 16px;
+  font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
   font-size: 1.18rem;
-  font-weight: 400;
+  font-weight: 700;
   letter-spacing: 0.01em;
   cursor: pointer;
   border: 2px solid transparent;

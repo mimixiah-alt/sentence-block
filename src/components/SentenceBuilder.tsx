@@ -41,6 +41,24 @@ const BLOCK_TYPE_LABEL: Record<WordBlock['type'], string> = {
   V: '동사',
 };
 
+const ASSEMBLY_PLACEHOLDER_TEXT: Record<LanguageCode, string> = {
+  en: 'Place blocks from the block box below here to complete the sentence.',
+  ja: '下のブロックボックスからブロックをここに置いて、文を完成させてください。',
+  zh: '请把下面积木盒里的积木放到这里，完成句子。',
+  es: 'Coloca aquí los bloques de la caja de abajo para completar la oración.',
+  fr: 'Place ici les blocs de la boîte ci-dessous pour compléter la phrase.',
+  hi: 'नीचे के ब्लॉक बॉक्स से ब्लॉक यहाँ रखकर वाक्य पूरा कीजिए।',
+};
+
+const ZONE_HELPER_TEXT: Record<LanguageCode, string> = {
+  en: 'Drag or tap the blocks (tap a placed block to send it back)',
+  ja: 'ブロックをドラッグするか、タップしてください(置いたブロックをタップすると戻ります)',
+  zh: '拖动或点击积木(点击已放好的积木可以放回去)',
+  es: 'Arrastra o toca los bloques (toca un bloque colocado para devolverlo)',
+  fr: 'Fais glisser ou touche les blocs (touche un bloc placé pour le renvoyer)',
+  hi: 'ब्लॉक खींचकर रखें या टैप करें (रखे हुए ब्लॉक पर टैप करने से वह वापस चला जाएगा)',
+};
+
 
 
 function createShuffledBlocks(question: SentenceQuestion): BlockInstance[] {
@@ -373,7 +391,7 @@ export function SentenceBuilder({
       <section className="zone-section" aria-label="내 문장">
         <div className="zone-header">
           <h2 className="zone-title">내 문장</h2>
-          <span className="zone-helper">블록을 끌어다 놓거나 눌러 보세요 (놓인 블록을 누르면 돌아가요)</span>
+          <span className="zone-helper">{ZONE_HELPER_TEXT[language]}</span>
         </div>
 
         <div
@@ -394,7 +412,7 @@ export function SentenceBuilder({
         >
           {assembledBlocks.length === 0 ? (
             <p className="zone-placeholder">
-              아래 블록 상자에서 블록을 여기에 놓아 문장을 완성해 보세요.
+              {ASSEMBLY_PLACEHOLDER_TEXT[language]}
             </p>
           ) : (
             <div className="block-list">

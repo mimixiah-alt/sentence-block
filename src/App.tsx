@@ -5,6 +5,7 @@ import {
   type SentenceQuestion,
 } from './data/lessons';
 import { StartScreen } from './components/StartScreen';
+import { LessonSelectScreen } from './components/LessonSelectScreen';
 import { GrammarScreen } from './components/GrammarScreen';
 import {
   SentenceBuilder,
@@ -13,7 +14,7 @@ import {
 import { ResultScreen } from './components/ResultScreen';
 import './App.css';
 
-type Screen = 'start' | 'grammar' | 'practice' | 'result';
+type Screen = 'start' | 'lesson' | 'grammar' | 'practice' | 'result';
 
 function App() {
   const [screen, setScreen] = useState<Screen>('start');
@@ -33,6 +34,11 @@ function App() {
   const selectedLesson =
     LESSONS.find((lesson) => lesson.id === selectedLessonId) ?? LESSONS[0];
 
+  const handleToLesson = () => {
+    window.scrollTo(0, 0);
+    setScreen('lesson');
+  };
+
   const handleToGrammar = () => {
     if (selectedLessonId === null) return;
     window.scrollTo(0, 0);
@@ -42,6 +48,11 @@ function App() {
   const handleBackToStart = () => {
     window.scrollTo(0, 0);
     setScreen('start');
+  };
+
+  const handleBackToLesson = () => {
+    window.scrollTo(0, 0);
+    setScreen('lesson');
   };
 
   const handleStartLesson = () => {
@@ -71,24 +82,30 @@ function App() {
   const handleSelectOtherLesson = () => {
     setIsReviewMode(false);
     window.scrollTo(0, 0);
-    setScreen('start');
+    setScreen('lesson');
   };
 
   return (
     <div className="app-shell">
       {screen === 'start' && (
         <StartScreen
-          selectedLessonId={selectedLessonId}
-          onSelectLesson={setSelectedLessonId}
           language={language}
           onLanguageChange={setLanguage}
+          onNext={handleToLesson}
+        />
+      )}
+      {screen === 'lesson' && (
+        <LessonSelectScreen
+          selectedLessonId={selectedLessonId}
+          onSelectLesson={setSelectedLessonId}
+          onBack={handleBackToStart}
           onNext={handleToGrammar}
         />
       )}
       {screen === 'grammar' && (
         <GrammarScreen
           lesson={selectedLesson}
-          onBack={handleBackToStart}
+          onBack={handleBackToLesson}
           onStart={handleStartLesson}
         />
       )}
