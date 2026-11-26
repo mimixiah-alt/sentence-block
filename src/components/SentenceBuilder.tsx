@@ -6,7 +6,7 @@ import {
   type LanguageCode,
   type SentenceQuestion,
   type WordBlock,
-} from '../data/sentences';
+} from '../data/lessons';
 import { speakKorean, stopSpeaking } from '../utils/speak';
 import { FeedbackBubble, type FeedbackStatus } from './FeedbackBubble';
 
@@ -22,12 +22,16 @@ interface DragState {
 export interface PracticeResult {
   correctCount: number;
   questionsWithMistakeCount: number;
+  mistakeQuestions: SentenceQuestion[];
 }
 
 interface SentenceBuilderProps {
+  lessonLabel: string;
   questions: readonly SentenceQuestion[];
   language: LanguageCode;
+  isReviewMode?: boolean;
   onLanguageChange: (language: LanguageCode) => void;
+  onHome: () => void;
   onFinish: (result: PracticeResult) => void;
 }
 
@@ -35,6 +39,15 @@ const BLOCK_TYPE_LABEL: Record<WordBlock['type'], string> = {
   N: '명사',
   P: '조사',
   V: '동사',
+};
+
+const ASSEMBLY_HELPER_TEXT: Record<LanguageCode, string> = {
+  en: 'Drag or tap blocks to place them (tap a placed block to return it)',
+  ja: 'ブロックをドラッグまたはタップして置いてください（置いたブロックをタップすると戻ります）',
+  zh: '请拖动或点击方块放置（点击已放置的方块可放回）',
+  es: 'Arrastra o toca los bloques para colocarlos (toca un bloque colocado para devolverlo)',
+  fr: 'Faites glisser ou touchez les blocs pour les placer (touchez un bloc placé pour le retirer)',
+  hi: 'ब्लॉक रखने के लिए खींचें या टैप करें (रखे गए ब्लॉक को वापस करने के लिए उस पर टैप करें)',
 };
 
 function createShuffledBlocks(question: SentenceQuestion): BlockInstance[] {
@@ -67,9 +80,12 @@ function createShuffledBlocks(question: SentenceQuestion): BlockInstance[] {
 }
 
 export function SentenceBuilder({
+  lessonLabel,
   questions,
   language,
+  isReviewMode = false,
   onLanguageChange,
+  onHome,
   onFinish,
 }: SentenceBuilderProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -80,12 +96,15 @@ export function SentenceBuilder({
   );
   const [assembledBlocks, setAssembledBlocks] = useState<BlockInstance[]>([]);
   const [feedbackStatus, setFeedbackStatus] = useState<FeedbackStatus>('idle');
+  const [matchedSentence, setMatchedSentence] = useState<string>('');
   const [wrongCount, setWrongCount] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
 
   const [solvedCount, setSolvedCount] = useState(0);
   const [hadMistakeOnCurrent, setHadMistakeOnCurrent] = useState(false);
-  const [questionsWithMistakeCount, setQuestionsWithMistakeCount] = useState(0);
+  const [mistakeQuestions, setMistakeQuestions] = useState<SentenceQuestion[]>(
+    [],
+  );
 
   const [dragState, setDragState] = useState<DragState | null>(null);
   const [dragOverZone, setDragOverZone] = useState<'assembly' | 'tray' | null>(
@@ -250,16 +269,17 @@ export function SentenceBuilder({
   const handleCheck = () => {
     if (assembledBlocks.length === 0 || isSolved) return;
 
-    const isMatch =
-      assembledBlocks.length === currentQuestion.answerBlocks.length &&
-      assembledBlocks.every((block, idx) => {
-        const expected = currentQuestion.answerBlocks[idx];
-        return block.text === expected.text && block.type === expected.type;
-      });
+    const formedWithPeriod = formatBlocksToSentence(assembledBlocks, true);
+    const acceptedSentences = [
+      currentQuestion.sentence,
+      ...(currentQuestion.acceptableAnswers ?? []),
+    ];
+    const isMatch = acceptedSentences.includes(formedWithPeriod);
 
     if (isMatch) {
+      setMatchedSentence(formedWithPeriod);
       setFeedbackStatus('correct');
-      speakKorean(currentQuestion.sentence);
+      speakKorean(formedWithPeriod);
       return;
     }
 
@@ -280,24 +300,27 @@ export function SentenceBuilder({
     stopSpeaking();
 
     const nextSolvedCount = solvedCount + (isSolved ? 1 : 0);
-    const nextMistakeCount =
-      questionsWithMistakeCount + (hadMistakeOnCurrent ? 1 : 0);
+    const nextMistakeQuestions = hadMistakeOnCurrent
+      ? [...mistakeQuestions, currentQuestion]
+      : mistakeQuestions;
 
     if (currentIndex + 1 >= questions.length) {
       onFinish({
         correctCount: nextSolvedCount,
-        questionsWithMistakeCount: nextMistakeCount,
+        questionsWithMistakeCount: nextMistakeQuestions.length,
+        mistakeQuestions: nextMistakeQuestions,
       });
       return;
     }
 
     const nextIndex = currentIndex + 1;
     setSolvedCount(nextSolvedCount);
-    setQuestionsWithMistakeCount(nextMistakeCount);
+    setMistakeQuestions(nextMistakeQuestions);
     setCurrentIndex(nextIndex);
     setTrayBlocks(createShuffledBlocks(questions[nextIndex]));
     setAssembledBlocks([]);
     setFeedbackStatus('idle');
+    setMatchedSentence('');
     setWrongCount(0);
     setShowAnswer(false);
     setHadMistakeOnCurrent(false);
@@ -306,7 +329,22 @@ export function SentenceBuilder({
 
   return (
     <main className="screen builder-screen">
+      <div className="builder-top-nav">
+        <button
+          type="button"
+          className="btn btn-home"
+          onClick={() => {
+            stopSpeaking();
+            onHome();
+          }}
+        >
+          🏠 처음으로
+        </button>
+        <span className="lesson-pill">{lessonLabel}</span>
+      </div>
+
       <header className="builder-header">
+        {isReviewMode && <span className="review-badge">틀린 문장 복습</span>}
         <span className="progress-badge" aria-label="진행 상황">
           {currentIndex + 1} / {questions.length}
         </span>
@@ -339,12 +377,10 @@ export function SentenceBuilder({
         <p className="prompt-english">{currentQuestion.meanings[language]}</p>
       </section>
 
-      <section className="zone-section" aria-label="문장 조립 칸">
+      <section className="zone-section" aria-label="내 문장">
         <div className="zone-header">
-          <h2 className="zone-title">조립 칸</h2>
-          <span className="zone-helper">
-            블록을 드래그하거나 눌러서 놓아 보세요 (놓인 블록을 누르면 돌아가요)
-          </span>
+          <h2 className="zone-title">내 문장</h2>
+          <span className="zone-helper">{ASSEMBLY_HELPER_TEXT[language]}</span>
         </div>
 
         <div
@@ -365,7 +401,7 @@ export function SentenceBuilder({
         >
           {assembledBlocks.length === 0 ? (
             <p className="zone-placeholder">
-              아래 보관함에서 블록을 여기에 놓아 문장을 완성해 보세요.
+              아래 블록 상자에서 블록을 여기에 놓아 문장을 완성해 보세요.
             </p>
           ) : (
             <div className="block-list">
@@ -391,10 +427,10 @@ export function SentenceBuilder({
                   }}
                   onDrop={(e) => handleAssembledBlockDrop(e, index)}
                   onDragEnd={clearDragState}
-                  className={`word-block block-${block.type} ${
+                  className={`word-block is-placed block-${block.type} ${
                     dragState?.uid === block.uid ? 'is-dragging' : ''
                   } ${dragOverBlockUid === block.uid ? 'is-insert-target' : ''}`}
-                  aria-label={`${block.text} (${BLOCK_TYPE_LABEL[block.type]}), 누르면 보관함으로 돌아갑니다`}
+                  aria-label={`${block.text} (${BLOCK_TYPE_LABEL[block.type]}), 누르면 블록 상자로 돌아갑니다`}
                 >
                   <span className="block-text">{block.text}</span>
                 </button>
@@ -404,7 +440,7 @@ export function SentenceBuilder({
         </div>
 
         <div className="sentence-preview" aria-live="polite">
-          <span className="preview-label">만든 문장</span>
+          <span className="preview-label">지금 만든 문장</span>
           <span className="preview-text">
             {formedSentence || '아직 놓인 블록이 없어요.'}
           </span>
@@ -416,15 +452,18 @@ export function SentenceBuilder({
         status={feedbackStatus}
         wrongCount={wrongCount}
         showAnswer={showAnswer}
-        correctSentence={currentQuestion.sentence}
+        correctSentence={matchedSentence || currentQuestion.sentence}
         isLastQuestion={isLastQuestion}
         onShowAnswer={() => setShowAnswer(true)}
+        onListenAnswer={() =>
+          speakKorean(matchedSentence || currentQuestion.sentence)
+        }
         onNext={handleNextQuestion}
       />
 
-      <section className="zone-section" aria-label="블록 보관함">
+      <section className="zone-section" aria-label="블록 상자">
         <div className="zone-header">
-          <h2 className="zone-title">블록 보관함</h2>
+          <h2 className="zone-title">블록 상자</h2>
           <div className="legend-row compact">
             <span className="legend-chip legend-N">명사</span>
             <span className="legend-chip legend-P">조사</span>
@@ -465,7 +504,7 @@ export function SentenceBuilder({
                   className={`word-block block-${block.type} ${
                     dragState?.uid === block.uid ? 'is-dragging' : ''
                   }`}
-                  aria-label={`${block.text} (${BLOCK_TYPE_LABEL[block.type]}), 누르면 조립 칸에 추가됩니다`}
+                  aria-label={`${block.text} (${BLOCK_TYPE_LABEL[block.type]}), 누르면 내 문장에 추가됩니다`}
                 >
                   <span className="block-text">{block.text}</span>
                 </button>
@@ -482,7 +521,7 @@ export function SentenceBuilder({
           onClick={handleListen}
           disabled={assembledBlocks.length === 0}
         >
-          🔊 듣기
+          🔊 내 문장 듣기
         </button>
 
         <button
@@ -500,7 +539,7 @@ export function SentenceBuilder({
           onClick={handleResetBlocks}
           disabled={assembledBlocks.length === 0 || isSolved}
         >
-          처음부터
+          다시 놓기
         </button>
       </div>
     </main>

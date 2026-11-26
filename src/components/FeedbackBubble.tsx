@@ -9,6 +9,7 @@ interface FeedbackBubbleProps {
   correctSentence: string;
   isLastQuestion: boolean;
   onShowAnswer: () => void;
+  onListenAnswer: () => void;
   onNext: () => void;
   containerRef?: RefObject<HTMLDivElement | null>;
 }
@@ -24,6 +25,7 @@ export function FeedbackBubble({
   correctSentence,
   isLastQuestion,
   onShowAnswer,
+  onListenAnswer,
   onNext,
   containerRef,
 }: FeedbackBubbleProps) {
@@ -54,13 +56,22 @@ export function FeedbackBubble({
               <p className="feedback-sub">{correctSentence}</p>
             </div>
           </div>
-          <button
-            type="button"
-            className="btn btn-next btn-large"
-            onClick={onNext}
-          >
-            {nextLabel}
-          </button>
+          <div className="feedback-actions">
+            <button
+              type="button"
+              className="btn btn-listen"
+              onClick={onListenAnswer}
+            >
+              🔊 정답 듣기
+            </button>
+            <button
+              type="button"
+              className="btn btn-next btn-large"
+              onClick={onNext}
+            >
+              {nextLabel}
+            </button>
+          </div>
         </>
       )}
 
@@ -92,13 +103,22 @@ export function FeedbackBubble({
             <span className="revealed-answer-label">정답 문장</span>
             <strong className="revealed-answer-text">{correctSentence}</strong>
           </div>
-          <button
-            type="button"
-            className="btn btn-next btn-large"
-            onClick={onNext}
-          >
-            {nextLabel}
-          </button>
+          <div className="feedback-actions">
+            <button
+              type="button"
+              className="btn btn-listen"
+              onClick={onListenAnswer}
+            >
+              🔊 정답 듣기
+            </button>
+            <button
+              type="button"
+              className="btn btn-next btn-large"
+              onClick={onNext}
+            >
+              {nextLabel}
+            </button>
+          </div>
         </>
       )}
     </div>
