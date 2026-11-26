@@ -41,14 +41,7 @@ const BLOCK_TYPE_LABEL: Record<WordBlock['type'], string> = {
   V: '동사',
 };
 
-const ASSEMBLY_HELPER_TEXT: Record<LanguageCode, string> = {
-  en: 'Drag or tap blocks to place them (tap a placed block to return it)',
-  ja: 'ブロックをドラッグまたはタップして置いてください（置いたブロックをタップすると戻ります）',
-  zh: '请拖动或点击方块放置（点击已放置的方块可放回）',
-  es: 'Arrastra o toca los bloques para colocarlos (toca un bloque colocado para devolverlo)',
-  fr: 'Faites glisser ou touchez les blocs pour les placer (touchez un bloc placé pour le retirer)',
-  hi: 'ब्लॉक रखने के लिए खींचें या टैप करें (रखे गए ब्लॉक को वापस करने के लिए उस पर टैप करें)',
-};
+
 
 function createShuffledBlocks(question: SentenceQuestion): BlockInstance[] {
   const items: BlockInstance[] = [
@@ -380,7 +373,7 @@ export function SentenceBuilder({
       <section className="zone-section" aria-label="내 문장">
         <div className="zone-header">
           <h2 className="zone-title">내 문장</h2>
-          <span className="zone-helper">{ASSEMBLY_HELPER_TEXT[language]}</span>
+          <span className="zone-helper">블록을 끌어다 놓거나 눌러 보세요 (놓인 블록을 누르면 돌아가요)</span>
         </div>
 
         <div

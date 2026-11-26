@@ -35,10 +35,12 @@ function App() {
 
   const handleToGrammar = () => {
     if (selectedLessonId === null) return;
+    window.scrollTo(0, 0);
     setScreen('grammar');
   };
 
   const handleBackToStart = () => {
+    window.scrollTo(0, 0);
     setScreen('start');
   };
 
@@ -47,11 +49,13 @@ function App() {
     setActiveQuestions(selectedLesson.questions);
     setIsReviewMode(false);
     setSessionKey((prev) => prev + 1);
+    window.scrollTo(0, 0);
     setScreen('practice');
   };
 
   const handleFinish = (practiceResult: PracticeResult) => {
     setResult(practiceResult);
+    window.scrollTo(0, 0);
     setScreen('result');
   };
 
@@ -60,11 +64,13 @@ function App() {
     setActiveQuestions(result.mistakeQuestions);
     setIsReviewMode(true);
     setSessionKey((prev) => prev + 1);
+    window.scrollTo(0, 0);
     setScreen('practice');
   };
 
   const handleSelectOtherLesson = () => {
     setIsReviewMode(false);
+    window.scrollTo(0, 0);
     setScreen('start');
   };
 
