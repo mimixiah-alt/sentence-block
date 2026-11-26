@@ -14,6 +14,28 @@ export function StartScreen({
   return (
     <main className="screen start-screen">
       <div className="card start-card">
+        <section
+          className="language-picker language-picker-top"
+          aria-label="뜻을 볼 언어 선택"
+        >
+          <p className="language-picker-label">뜻을 볼 언어를 고르세요</p>
+          <div className="language-grid" role="group" aria-label="언어 목록">
+            {LANGUAGE_OPTIONS.map((option) => (
+              <button
+                key={option.code}
+                type="button"
+                className={`language-option-btn ${
+                  language === option.code ? 'is-selected' : ''
+                }`}
+                aria-pressed={language === option.code}
+                onClick={() => onLanguageChange(option.code)}
+              >
+                {option.flag} {option.label}
+              </button>
+            ))}
+          </div>
+        </section>
+
         <div className="badge-pill">세종학당 한국어 1 · 7과</div>
         <h1 className="app-title">문장 블록</h1>
         <p className="app-subtitle">
@@ -45,25 +67,6 @@ export function StartScreen({
           <span className="legend-chip legend-P">조사</span>
           <span className="legend-chip legend-V">동사</span>
         </div>
-
-        <section className="language-picker" aria-label="뜻을 볼 언어 선택">
-          <p className="language-picker-label">뜻을 볼 언어를 고르세요</p>
-          <div className="language-grid" role="group" aria-label="언어 목록">
-            {LANGUAGE_OPTIONS.map((option) => (
-              <button
-                key={option.code}
-                type="button"
-                className={`language-option-btn ${
-                  language === option.code ? 'is-selected' : ''
-                }`}
-                aria-pressed={language === option.code}
-                onClick={() => onLanguageChange(option.code)}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </section>
 
         <button
           type="button"

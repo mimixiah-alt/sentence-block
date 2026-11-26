@@ -1,3 +1,5 @@
+import type { RefObject } from 'react';
+
 export type FeedbackStatus = 'idle' | 'correct' | 'wrong';
 
 interface FeedbackBubbleProps {
@@ -5,7 +7,10 @@ interface FeedbackBubbleProps {
   wrongCount: number;
   showAnswer: boolean;
   correctSentence: string;
+  isLastQuestion: boolean;
   onShowAnswer: () => void;
+  onNext: () => void;
+  containerRef?: RefObject<HTMLDivElement | null>;
 }
 
 /**
@@ -17,7 +22,10 @@ export function FeedbackBubble({
   wrongCount,
   showAnswer,
   correctSentence,
+  isLastQuestion,
   onShowAnswer,
+  onNext,
+  containerRef,
 }: FeedbackBubbleProps) {
   const canShowAnswerButton =
     status !== 'correct' && wrongCount >= 3 && !showAnswer;
@@ -26,22 +34,34 @@ export function FeedbackBubble({
     return null;
   }
 
+  const nextLabel = isLastQuestion ? '결과 보기' : '다음 문제 →';
+
   return (
     <div
+      ref={containerRef}
       className={`feedback-bubble feedback-${status}`}
       role="status"
       aria-live="polite"
     >
       {status === 'correct' && (
-        <div className="feedback-content">
-          <span className="feedback-icon" aria-hidden="true">
-            🎉
-          </span>
-          <div>
-            <p className="feedback-title">잘했어요!</p>
-            <p className="feedback-sub">{correctSentence}</p>
+        <>
+          <div className="feedback-content">
+            <span className="feedback-icon" aria-hidden="true">
+              🎉
+            </span>
+            <div>
+              <p className="feedback-title">잘했어요!</p>
+              <p className="feedback-sub">{correctSentence}</p>
+            </div>
           </div>
-        </div>
+          <button
+            type="button"
+            className="btn btn-next btn-large"
+            onClick={onNext}
+          >
+            {nextLabel}
+          </button>
+        </>
       )}
 
       {status === 'wrong' && (
@@ -67,12 +87,20 @@ export function FeedbackBubble({
       )}
 
       {showAnswer && status !== 'correct' && (
-        <div className="revealed-answer">
-          <span className="revealed-answer-label">정답 문장</span>
-          <strong className="revealed-answer-text">{correctSentence}</strong>
-        </div>
+        <>
+          <div className="revealed-answer">
+            <span className="revealed-answer-label">정답 문장</span>
+            <strong className="revealed-answer-text">{correctSentence}</strong>
+          </div>
+          <button
+            type="button"
+            className="btn btn-next btn-large"
+            onClick={onNext}
+          >
+            {nextLabel}
+          </button>
+        </>
       )}
     </div>
   );
 }
-

@@ -161,6 +161,12 @@
   padding-top: 4px;
 }
 
+.language-picker-top {
+  padding-top: 0;
+  padding-bottom: 12px;
+  border-bottom: 1.5px dashed var(--border-soft);
+}
+
 .language-picker-label {
   font-size: 0.95rem;
   font-weight: 700;
@@ -423,6 +429,12 @@
 
 .tray-zone {
   background: rgba(255, 255, 255, 0.85);
+}
+
+.tray-zone.is-disabled {
+  opacity: 0.55;
+  pointer-events: none;
+  background: #f1f5f9;
 }
 
 .drop-zone.is-drag-over {

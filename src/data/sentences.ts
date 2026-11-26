@@ -4,16 +4,17 @@ export type LanguageCode = 'en' | 'ja' | 'zh' | 'es' | 'fr' | 'hi';
 
 export interface LanguageOption {
   code: LanguageCode;
+  flag: string;
   label: string;
 }
 
 export const LANGUAGE_OPTIONS: readonly LanguageOption[] = [
-  { code: 'en', label: 'English' },
-  { code: 'ja', label: '日本語' },
-  { code: 'zh', label: '中文' },
-  { code: 'es', label: 'Español' },
-  { code: 'fr', label: 'Français' },
-  { code: 'hi', label: 'हिन्दी' },
+  { code: 'en', flag: '🇺🇸', label: 'English' },
+  { code: 'ja', flag: '🇯🇵', label: '日本語' },
+  { code: 'zh', flag: '🇨🇳', label: '中文' },
+  { code: 'es', flag: '🇪🇸', label: 'Español' },
+  { code: 'fr', flag: '🇫🇷', label: 'Français' },
+  { code: 'hi', flag: '🇮🇳', label: 'हिन्दी' },
 ];
 
 export interface WordBlock {

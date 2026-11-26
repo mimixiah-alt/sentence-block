@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { DragEvent } from 'react';
 import {
   formatBlocksToSentence,
@@ -92,6 +92,7 @@ export function SentenceBuilder({
     null,
   );
   const [dragOverBlockUid, setDragOverBlockUid] = useState<string | null>(null);
+  const feedbackRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     return () => {
@@ -99,7 +100,17 @@ export function SentenceBuilder({
     };
   }, []);
 
+  useEffect(() => {
+    if (feedbackStatus !== 'idle' || showAnswer) {
+      feedbackRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+    }
+  }, [feedbackStatus, wrongCount, showAnswer]);
+
   const isSolved = feedbackStatus === 'correct';
+  const isLastQuestion = currentIndex + 1 >= questions.length;
   const formedSentence = formatBlocksToSentence(assembledBlocks);
 
   const clearDragState = () => {
@@ -293,8 +304,6 @@ export function SentenceBuilder({
     clearDragState();
   };
 
-  const canProceedNext = isSolved || showAnswer;
-
   return (
     <main className="screen builder-screen">
       <header className="builder-header">
@@ -317,7 +326,7 @@ export function SentenceBuilder({
         >
           {LANGUAGE_OPTIONS.map((option) => (
             <option key={option.code} value={option.code}>
-              {option.label}
+              {option.flag} {option.label}
             </option>
           ))}
         </select>
@@ -402,6 +411,17 @@ export function SentenceBuilder({
         </div>
       </section>
 
+      <FeedbackBubble
+        containerRef={feedbackRef}
+        status={feedbackStatus}
+        wrongCount={wrongCount}
+        showAnswer={showAnswer}
+        correctSentence={currentQuestion.sentence}
+        isLastQuestion={isLastQuestion}
+        onShowAnswer={() => setShowAnswer(true)}
+        onNext={handleNextQuestion}
+      />
+
       <section className="zone-section" aria-label="블록 보관함">
         <div className="zone-header">
           <h2 className="zone-title">블록 보관함</h2>
@@ -415,7 +435,8 @@ export function SentenceBuilder({
         <div
           className={`drop-zone tray-zone ${
             dragOverZone === 'tray' ? 'is-drag-over' : ''
-          }`}
+          } ${isSolved ? 'is-disabled' : ''}`}
+          aria-disabled={isSolved}
           onDragOver={(e) => {
             if (isSolved) return;
             e.preventDefault();
@@ -482,26 +503,6 @@ export function SentenceBuilder({
           처음부터
         </button>
       </div>
-
-      <FeedbackBubble
-        status={feedbackStatus}
-        wrongCount={wrongCount}
-        showAnswer={showAnswer}
-        correctSentence={currentQuestion.sentence}
-        onShowAnswer={() => setShowAnswer(true)}
-      />
-
-      {canProceedNext && (
-        <div className="next-action-row">
-          <button
-            type="button"
-            className="btn btn-next btn-large"
-            onClick={handleNextQuestion}
-          >
-            다음 문제
-          </button>
-        </div>
-      )}
     </main>
   );
 }
